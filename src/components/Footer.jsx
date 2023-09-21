@@ -9,13 +9,15 @@ function Footer() {
       py={3}
       textAlign="center"
       borderTop="4px solid #007BFF"
+      display="absolute"
+      bottom="0"
     >
       <Container>
         <Typography variant="body1" gutterBottom>
           &copy; {new Date().getFullYear()} eParking. All rights reserved.
         </Typography>
         <Typography variant="body2">
-          Designed and developed with ❤️ by Your Name
+          Designed and developed with ❤️ saad bin Mohammed Patel
         </Typography>
         <Box mt={2}>
           <Link

@@ -13,7 +13,8 @@ import { LocalParking, LocalParkingOutlined } from "@mui/icons-material";
 import parkingSlotsData from "../data"; // Adjust the import path as needed
 import parking1 from "../assets/images/parking1.jpg";
 import ReserveParking from "./ReserveParking"; // Import your ReserveParking component here
-
+import { useAuth } from "../AuthContext";
+import { useEffect } from "react";
 const headerStyle = {
   position: "relative",
   backgroundColor: "transparent",
@@ -78,15 +79,41 @@ const ParkingSlot = ({ slotNumber, isReserved, onReserveClick }) => {
 };
 
 const ParkingSlots = () => {
-  const [parkingData, setParkingData] = useState(parkingSlotsData);
+  const [parkingData, setParkingData] = useState([]);
   const [openReserveModal, setOpenReserveModal] = useState(false);
+  const [selectedSlotId, setSelectedSlotId] = useState(null); // Store the selected slot ID
+  const [selectedSpaceNumber, setSelectedSpaceNumber] = useState(null); // Store the selected space number
+  const auth = useAuth();
 
-  const handleReserveClick = (slotNumber) => {
-    setParkingData((prevData) =>
-      prevData.map((slot) =>
-        slot.id === slotNumber ? { ...slot, isReserved: true } : slot
-      )
-    );
+  useEffect(() => {
+    const fetchParkingData = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:8000/parking/api/parking-spaces/",
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${auth.token}`,
+            },
+          }
+        );
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log(data);
+        setParkingData(data);
+      } catch (error) {
+        console.error("Error fetching or parsing data:", error);
+      }
+    };
+    fetchParkingData();
+  }, [auth.token]);
+
+  const handleReserveClick = (slotNumber, spaceNumber) => {
+    setSelectedSlotId(slotNumber);
+    setSelectedSpaceNumber(spaceNumber);
     setOpenReserveModal(true);
   };
 
@@ -125,8 +152,10 @@ const ParkingSlots = () => {
           <ParkingSlot
             key={slot.id}
             slotNumber={slot.id}
-            isReserved={slot.isReserved}
-            onReserveClick={handleReserveClick}
+            isReserved={slot.is_reserved}
+            onReserveClick={() =>
+              handleReserveClick(slot.id, slot.space_number)
+            }
           />
         ))}
       </Grid>
@@ -140,8 +169,11 @@ const ParkingSlots = () => {
       >
         <DialogTitle>Reserve Parking</DialogTitle>
         <DialogContent>
-          {/* Display the ReserveParking component inside the modal */}
-          <ReserveParking />
+          {/* Pass the selected slot ID and space number to the ReserveParking component */}
+          <ReserveParking
+            slotId={selectedSlotId}
+            spaceNumber={selectedSpaceNumber}
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseReserveModal} color="primary">

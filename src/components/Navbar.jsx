@@ -12,8 +12,10 @@ import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 import AdbIcon from "@mui/icons-material/Adb";
-import { NavLink } from "react-router-dom";
-
+import { NavLink, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Navigate } from "react-router-dom";
+import { useAuth } from "../AuthContext";
 const pages = [
   { name: "Home", url: "/" },
   { name: "Parking slots", url: "/parking-slots" },
@@ -25,8 +27,14 @@ const settings = ["Profile", "Account", "Dashboard", "Logout"];
 function Navbar() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
-  const [isLoggedIn, setIsLoggedIn] = React.useState(false); // Default to not logged in
+  const [isLoggedIn, setIsLoggedIn] = React.useState(null); // Default to not logged in
+  const [error, setError] = React.useState(null);
+  const navigate = useNavigate(); // Access the history object to navigate
 
+  const auth = useAuth();
+  // useEffect(() => {
+  //   setIsLoggedIn(localStorage.getItem("accessToken"));
+  // }, []);
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
   };
@@ -42,22 +50,38 @@ function Navbar() {
     setAnchorElUser(null);
   };
 
-  const handleLogin = () => {
-    // Perform the login logic here
-    // For example, you can make an API request to authenticate the user
-    // If login is successful, update the state
-    setIsLoggedIn(true);
-  };
+  const handleLogout = async (e) => {
+    e.preventDefault();
+    try {
+      const token = auth.token; // Use the token from the auth object
 
-  const handleLogout = () => {
-    // Perform the logout logic here
-    // For example, clear authentication tokens or cookies
-    // Update the state to reflect that the user is logged out
-    setIsLoggedIn(false);
+      console.log("token", token);
+      const response = await fetch("http://localhost:8000/user/api/logout/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        console.log("Logout successful");
+        auth.logout(); // Call the logout function from the AuthContext
+        navigate("/login"); // Navigate to the login page
+      } else {
+        console.log("token", token);
+        console.error("Authentication failed");
+        setError("Username and/or password is incorrect");
+      }
+    } catch (error) {
+      console.error("Error occurred during authentication:", error);
+      setError("Cannot connect to the server!");
+    }
   };
 
   return (
     <AppBar position="static">
+      {/* {auth.isLoggedIn && <Navigate to="/" />} */}
       <Container maxWidth="xl">
         <Toolbar disableGutters>
           <AdbIcon sx={{ display: { xs: "none", md: "flex" }, mr: 1 }} />
@@ -162,12 +186,12 @@ function Navbar() {
           </Box>
 
           <Box sx={{ flexGrow: 0 }}>
-            {isLoggedIn ? (
+            {auth.isLoggedIn ? (
               <>
                 <Tooltip title="Open settings">
                   <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                     <Avatar
-                      alt="Remy Sharp"
+                      alt={auth.username.toUpperCase()}
                       src="/static/images/avatar/2.jpg"
                     />
                   </IconButton>

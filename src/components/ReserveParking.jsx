@@ -13,8 +13,9 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import EventIcon from "@mui/icons-material/Event";
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
-
-function ReserveParking() {
+import { useAuth } from "../AuthContext";
+function ReserveParking(props) {
+  //console.log(props);
   const [checkInDate, setCheckInDate] = useState("");
   const [checkInTime, setCheckInTime] = useState("");
   const [checkOutDate, setCheckOutDate] = useState("");
@@ -58,9 +59,61 @@ function ReserveParking() {
       setError("");
     }
   };
-
-  const handleBookNow = () => {
+  const auth = useAuth();
+  const handleBookNow = async ({}) => {
     // Add logic to book the parking spot
+    console.log("checkInDate", checkInDate);
+    console.log("checkInTime", checkInTime);
+    console.log("checkOutDate", checkOutDate);
+    console.log("checkOutTime", checkOutTime);
+    const currentDate = new Date();
+
+    // Get the date components
+    const year = currentDate.getFullYear();
+    const month = String(currentDate.getMonth() + 1).padStart(2, "0"); // Months are zero-based
+    const day = String(currentDate.getDate()).padStart(2, "0");
+
+    // Get the time components
+    const hours = String(currentDate.getHours()).padStart(2, "0");
+    const minutes = String(currentDate.getMinutes()).padStart(2, "0");
+    const seconds = String(currentDate.getSeconds()).padStart(2, "0");
+    console.log(props);
+    try {
+      const response = await fetch(
+        "http://localhost:8000/reservation/api/reservations/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${auth.token}`,
+          },
+          body: JSON.stringify({
+            end_time: `${checkOutDate} ${checkOutTime}:00`,
+            id: props.slotId,
+            parking_space: props.spaceNumber,
+            reservation_time: `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`,
+            start_time: `${checkInDate} ${checkInTime}:00`,
+            user: 1,
+          }),
+        }
+      );
+
+      if (response.ok) {
+        console.log("response", response);
+        const data = response.json();
+        console.log("data", data);
+        // navigate("/login");
+        // Use the login function to set the user as authenticated and store the token
+      } else {
+        // Handle authentication error (e.g., display an error message)
+        console.error("Error reserving a parking slot");
+        // setError("Username and/or password is incorrect");
+      }
+    } catch (error) {
+      console.log("catch error");
+      console.error("Error occurred during authentication:", error);
+      // setError("Cannot connect to server!");
+    }
     console.log("Booking now...");
   };
 

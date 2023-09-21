@@ -1,7 +1,9 @@
 import React from "react";
 import HeroSection from "../components/HeroSection";
 import ReserveParking from "../components/ReserveParking";
+import useEffect from "react";
 function HomePage() {
+  console.log("hompage");
   return (
     <div>
       <HeroSection />

@@ -2,18 +2,22 @@ import React from "react";
 import { Box, Container, Typography, TextField, Button } from "@mui/material";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Signup = () => {
+  const navigate = useNavigate();
+  const [error, setError] = useState("");
   const validationSchema = Yup.object().shape({
     firstName: Yup.string().required("First Name is required"),
     lastName: Yup.string().required("Last Name is required"),
-    contact: Yup.string()
-      .required("Contact is required")
-      .matches(/^(0\d{10}|3\d{9})$/, "Invalid contact number"),
+    userName: Yup.string()
+      .required("User Name is required")
+      .min(6, "username must be at least 6 characters"),
     email: Yup.string()
       .email("Invalid email address")
       .required("Email is required"),
-    address: Yup.string().required("Address is required"),
+
     password: Yup.string()
       .min(6, "Password must be at least 6 characters")
       .required("Password is required"),
@@ -23,15 +27,50 @@ const Signup = () => {
     initialValues: {
       firstName: "",
       lastName: "",
-      contact: "",
+      userName: "",
       email: "",
-      address: "",
+
       password: "",
     },
     validationSchema: validationSchema,
-    onSubmit: (values) => {
+    onSubmit: async (values) => {
       // Handle form submission here
-      console.log("Form submitted with values:", values);
+      // e.preventDefault();
+      try {
+        const response = await fetch(
+          "http://localhost:8000/user/api/register/",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              // withCredentials: true,
+            },
+
+            body: JSON.stringify({
+              username: values.userName,
+              email: values.email,
+              password: values.password,
+              first_name: values.firstName,
+              last_name: values.lastName,
+            }),
+          }
+        );
+
+        if (response.ok) {
+          console.log("response", response);
+          navigate("/login");
+          // Use the login function to set the user as authenticated and store the token
+        } else {
+          // Handle authentication error (e.g., display an error message)
+          console.error("Error signup");
+          setError("Username and/or password is incorrect");
+        }
+      } catch (error) {
+        console.log("catch error");
+        console.error("Error occurred during authentication:", error);
+        setError("Cannot connect to server!");
+      }
+      console.log("Form submitted with values:", values.firstName);
     },
   });
 
@@ -66,14 +105,14 @@ const Signup = () => {
           />
           <TextField
             fullWidth
-            label="Contact"
+            label="userName"
             variant="outlined"
             margin="normal"
-            name="contact"
-            value={formik.values.contact}
+            name="userName"
+            value={formik.values.userName}
             onChange={formik.handleChange}
-            error={formik.touched.contact && Boolean(formik.errors.contact)}
-            helperText={formik.touched.contact && formik.errors.contact}
+            error={formik.touched.userName && Boolean(formik.errors.userName)}
+            helperText={formik.touched.userName && formik.errors.userName}
           />
           <TextField
             fullWidth
@@ -86,17 +125,7 @@ const Signup = () => {
             error={formik.touched.email && Boolean(formik.errors.email)}
             helperText={formik.touched.email && formik.errors.email}
           />
-          <TextField
-            fullWidth
-            label="Address"
-            variant="outlined"
-            margin="normal"
-            name="address"
-            value={formik.values.address}
-            onChange={formik.handleChange}
-            error={formik.touched.address && Boolean(formik.errors.address)}
-            helperText={formik.touched.address && formik.errors.address}
-          />
+
           <TextField
             fullWidth
             label="Password"

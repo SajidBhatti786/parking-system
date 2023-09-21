@@ -6,7 +6,7 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import ContactForm from "./ContactForm"; // Create this component separately
 import parking1 from "../assets/images/parking1.jpg";
 import GoogleMapReact from "google-map-react";
-
+import { Marker } from "@react-google-maps/api";
 // Styles for the header section
 const headerStyle = {
   background: `url(${parking1}) no-repeat center center`,
@@ -52,9 +52,13 @@ const Contact = () => {
                 bootstrapURLKeys={{
                   key: "AIzaSyAMUBhDadTRhOzWjM8jX-pyOWNYa298dHY",
                 }}
-                defaultCenter={{ lat: 28.0167, lng: 69.3167 }} // Ghotki, Pakistan coordinates
+                defaultCenter={{ lat: 52.629757, lng: -1.128456 }} // Ghotki, Pakistan coordinates
                 defaultZoom={14}
               >
+                {/* <Marker
+                  // onClick={this.onMarkerClick}
+                  name={"Current location"}
+                /> */}
                 {/* You can add custom markers or other map components here */}
               </GoogleMapReact>
             </div>
