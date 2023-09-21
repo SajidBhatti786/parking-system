@@ -1,11 +1,13 @@
 from rest_framework import generics , status
 from .serializers import ParkingSpaceSerializer
+from django.http import JsonResponse
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from .serializers import ParkingSpaceSerializer
 from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth.decorators import login_required
 
 from parking.models import ParkingSpace
 
@@ -15,6 +17,7 @@ class ParkingSpaceListView(generics.ListAPIView):
     queryset = ParkingSpace.objects.all()
     serializer_class = ParkingSpaceSerializer
     permission_classes = [IsAuthenticated]
+        
 
 # This View give additional information of particular parking space
 class ParkingSpaceViewSet(viewsets.ModelViewSet):
@@ -63,3 +66,11 @@ class ParkingSpaceDeleteView(generics.DestroyAPIView):
             return Response({'detail': 'Space removed successfully' } , status=status.HTTP_204_NO_CONTENT )
         except Exception as e:
             return Response({'detail': 'Space not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+def  get_first_availablepark(request):
+    try:
+        parking = ParkingSpace.objects.filter(is_available=True).first()
+        return JsonResponse({"detail":"Slot is Available"}, status=status.HTTP_200_OK)
+    except Exception as e :
+        return JsonResponse({"detail":"Not found"}, status= status.HTTP_404_NOT_FOUND)
+    

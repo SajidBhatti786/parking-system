@@ -16,13 +16,19 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
+
 const pages = [
   { name: "Home", url: "/" },
   { name: "Parking slots", url: "/parking-slots" },
   { name: "About", url: "/about" },
   { name: "Contact", url: "/contact" },
 ];
-const settings = ["Profile", "Account", "Dashboard", "Logout"];
+const settings = [
+  { name: "Profile", url: "/profile" }, // Change the URL for Profile
+  { name: "My Reservation", url: "/myreservation" }, // Change the URL for Account
+  { name: "Dashboard", url: "/dashboard" }, // Change the URL for Dashboard
+  { name: "Logout", action: "logout" },
+];
 
 function Navbar() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
@@ -32,12 +38,11 @@ function Navbar() {
   const navigate = useNavigate(); // Access the history object to navigate
 
   const auth = useAuth();
-  // useEffect(() => {
-  //   setIsLoggedIn(localStorage.getItem("accessToken"));
-  // }, []);
+
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
   };
+
   const handleOpenUserMenu = (event) => {
     setAnchorElUser(event.currentTarget);
   };
@@ -81,7 +86,6 @@ function Navbar() {
 
   return (
     <AppBar position="static">
-      {/* {auth.isLoggedIn && <Navigate to="/" />} */}
       <Container maxWidth="xl">
         <Toolbar disableGutters>
           <AdbIcon sx={{ display: { xs: "none", md: "flex" }, mr: 1 }} />
@@ -100,7 +104,7 @@ function Navbar() {
               textDecoration: "none",
             }}
           >
-            eParking
+            IBM Parking
           </Typography>
 
           <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
@@ -213,13 +217,22 @@ function Navbar() {
                   onClose={handleCloseUserMenu}
                 >
                   {settings.map((setting) => (
-                    <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                      <Typography
-                        textAlign="center"
-                        onClick={setting === "Logout" ? handleLogout : null}
+                    <MenuItem
+                      key={setting.name}
+                      onClick={
+                        setting.action === "logout"
+                          ? handleLogout
+                          : handleCloseUserMenu // Use a function to close the menu for other options
+                      }
+                    >
+                      <NavLink
+                        to={setting.url} // Use the URL for navigation
+                        style={{ textDecoration: "none", color: "inherit" }}
                       >
-                        {setting}
-                      </Typography>
+                        <Typography textAlign="center">
+                          {setting.name}
+                        </Typography>
+                      </NavLink>
                     </MenuItem>
                   ))}
                 </Menu>

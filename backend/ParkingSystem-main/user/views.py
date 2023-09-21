@@ -72,7 +72,8 @@ class UserLoginView(TokenObtainPairView):
                 'token': data['access'],
                 'refresh_token': data['refresh'],
                 'username':user.username,
-                'email':user.email
+                'email':user.email,
+                'user_id':user.id
             }
             return Response(custom_data, status=status.HTTP_200_OK)
         

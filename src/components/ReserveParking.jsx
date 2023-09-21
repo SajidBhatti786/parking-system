@@ -78,9 +78,12 @@ function ReserveParking(props) {
     const minutes = String(currentDate.getMinutes()).padStart(2, "0");
     const seconds = String(currentDate.getSeconds()).padStart(2, "0");
     console.log(props);
+    console.log(auth.userId);
+    console.log(checkOutDate);
+    console.log(checkOutTime);
     try {
       const response = await fetch(
-        "http://localhost:8000/reservation/api/reservations/",
+        "http://localhost:8000/reservation/api/reservations/create/",
         {
           method: "POST",
           headers: {
@@ -88,12 +91,11 @@ function ReserveParking(props) {
             Authorization: `Bearer ${auth.token}`,
           },
           body: JSON.stringify({
-            end_time: `${checkOutDate} ${checkOutTime}:00`,
+            start_time: `${checkInDate}T${checkOutTime}:00Z`,
+            end_time: `${checkOutDate}T${checkOutTime}:00Z`,
             id: props.slotId,
             parking_space: props.spaceNumber,
-            reservation_time: `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`,
-            start_time: `${checkInDate} ${checkInTime}:00`,
-            user: 1,
+            user: `${auth.userId}`,
           }),
         }
       );

@@ -14,6 +14,7 @@ import NotFound from "./pages/NotFound";
 import { useAuth } from "./AuthContext"; // Import the useAuth hook from your AuthContext file
 import { useEffect } from "react";
 import AdminPage from "./pages/AdminPage";
+import MyReservations from "./components/MyReservations";
 
 function App() {
   const auth = useAuth(); // Use the useAuth hook to access authentication state
@@ -45,7 +46,6 @@ function App() {
             <Route path="/parking-slots" element={<ParkingSlots />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/about" element={<AboutPage />} />
-            <Route path="/admin" element={<AdminPage />} />
           </>
         ) : (
           // Redirect to the login page if not logged in

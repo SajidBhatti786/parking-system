@@ -22,7 +22,7 @@ class Reservation(models.Model):
 
 
 class ReservationHistory(models.Model):
-    # user = models.ForeignKey(User, on_delete=models.CASCADE , related_name="custom_user")
+    user = models.ForeignKey(User, on_delete=models.CASCADE , related_name="custom_user")
     parking_space = models.ForeignKey(ParkingSpace, on_delete=models.CASCADE)
     reservation = models.ForeignKey(Reservation, on_delete=models.CASCADE)
     status = models.CharField(max_length=10,choices=[('booked','Booked'), ('canceled','Canceled')])

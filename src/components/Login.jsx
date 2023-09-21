@@ -53,11 +53,13 @@ const Login = () => {
         // Use the login function to set the user as authenticated and store the token
         console.log("token", accessToken);
         console.log("login", accessToken);
+        console.log(responseData);
         login(
           responseData.token,
           responseData.email,
           responseData.refresh_token,
-          responseData.username
+          responseData.username,
+          responseData.user_id
         );
       } else {
         // Handle authentication error (e.g., display an error message)

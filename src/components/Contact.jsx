@@ -37,10 +37,10 @@ const Contact = () => {
         <div style={overlayStyle}>
           <Typography variant="h4">Contact Us</Typography>
           <Typography variant="subtitle1">
-            <EmailIcon /> your.email@example.com
+            <EmailIcon /> saad_patel123@outlook.com
           </Typography>
           <Typography variant="subtitle1">
-            <LocationOnIcon /> Ghotki, Pakistan
+            <LocationOnIcon /> IBM 20-40 New Walk
           </Typography>
         </div>
       </header>

@@ -2,14 +2,15 @@ from .models import Reservation
 from django.db import transaction 
 from .serializers import ReservationSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from rest_framework import generics, status
 from rest_framework.response import Response
 from .models import Reservation
+
 from .serializers import ReservationSerializer
 from reservation.models import ReservationHistory
 
-class ReservationListCreateView(generics.ListCreateAPIView):
+class ReservationListCreateView(generics.ListAPIView):
     serializer_class = ReservationSerializer
     permission_classes = [IsAuthenticated]
 
@@ -31,35 +32,45 @@ class ReservationDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
 
 
+
 class CreateReservationView(generics.CreateAPIView):
     serializer_class = ReservationSerializer
     permission_classes = [IsAuthenticated]
 
-    @transaction.atomic
     def perform_create(self, serializer):
         try:
             user = self.request.user
             parking_space = serializer.validated_data.get('parking_space')
-            print("fkdfhsdkfsjhdfgdjhfgsdf")
 
             # Check if a reservation already exists for the same user and parking space
             existing_reservation = Reservation.objects.filter(user=user, parking_space=parking_space).first()
-            
             if existing_reservation  : 
                 return Response({'detail': 'This space is already reserved'}, status=status.HTTP_400_BAD_REQUEST)
-            
             end_time = datetime.now() + timedelta(hours=8)
-
-            reservation = serializer.save(user=user, start_time=datetime.now(), end_time=end_time)
-            
-            # Creating Entry on Reservation History
+            # Create Reservation and Add to Schedule Reservation
+            reservation = serializer.save(user=user, end_time=end_time)
+            print("Reservation:", reservation)
+            # schedule_reservation_end_task(resevation.id)                    
             ReservationHistory.objects.create(user=user, parking_space=parking_space, reservation=reservation, status='Booked')
             
+            # Check for expired reservations and free up parking spaces
+            expired_reservations = Reservation.objects.filter(end_time__lte=datetime.now())
+            for expired_reservation in expired_reservations:
+                reservation_history = ReservationHistory.objects.get(reservation=expired_reservation)
+                reservation_history.status="Completed"
+                reservation_history.save()
+                expired_reservation.save()
+                expired_parking_space = expired_reservation.parking_space
+                expired_parking_space.is_reserved = False
+                expired_parking_space.is_available = True
+                expired_parking_space.save()
+
             # Update the corresponding ParkingSpace object's is_reserved field to True
             parking_space.is_reserved = True
             parking_space.is_available= False
             parking_space.save()
-            print("Reserved")
+
+            
             return Response({'detail': 'Reservation created successfully.', "space":parking_space }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({'detail': "Model Error!, Please varify model's field and contraints"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR )
