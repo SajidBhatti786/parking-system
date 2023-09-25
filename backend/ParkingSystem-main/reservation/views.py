@@ -10,7 +10,7 @@ from .models import Reservation
 from .serializers import ReservationSerializer
 from reservation.models import ReservationHistory
 
-class ReservationListCreateView(generics.ListAPIView):
+class ReservationListCreateView(generics.ListCreateAPIView):
     serializer_class = ReservationSerializer
     permission_classes = [IsAuthenticated]
 
@@ -45,7 +45,8 @@ class CreateReservationView(generics.CreateAPIView):
             # Check if a reservation already exists for the same user and parking space
             existing_reservation = Reservation.objects.filter(user=user, parking_space=parking_space).first()
             if existing_reservation  : 
-                return Response({'detail': 'This space is already reserved'}, status=status.HTTP_400_BAD_REQUEST)
+                pass
+                # return Response({'detail': 'This space is already reserved'}, status=status.HTTP_400_BAD_REQUEST)
             end_time = datetime.now() + timedelta(hours=8)
             # Create Reservation and Add to Schedule Reservation
             reservation = serializer.save(user=user, end_time=end_time)

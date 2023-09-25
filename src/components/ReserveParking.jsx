@@ -79,6 +79,9 @@ function ReserveParking(props) {
     const seconds = String(currentDate.getSeconds()).padStart(2, "0");
     console.log(props);
     console.log(auth.userId);
+    console.log(auth.token);
+    console.log(auth.username);
+    console.log(auth.email);
     console.log(checkOutDate);
     console.log(checkOutTime);
     try {
@@ -101,6 +104,7 @@ function ReserveParking(props) {
       );
 
       if (response.ok) {
+        alert("Reserved successfully!");
         console.log("response", response);
         const data = response.json();
         console.log("data", data);

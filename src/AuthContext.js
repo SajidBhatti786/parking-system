@@ -12,30 +12,47 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     // Check for an existing access token in local storage during component initialization
-    const accessToken = localStorage.getItem("accessToken");
-    if (accessToken) {
-      // If an access token exists, set the user as logged in
-      setIsLoggedIn(true);
-      setToken(accessToken);
+    const loadData = async () => {
+      const accessToken = localStorage.getItem("accessToken");
+      if (accessToken) {
+        // If an access token exists, set the user as logged in
+        setIsLoggedIn(true);
+        setToken(accessToken);
+        const storedEmail = localStorage.getItem("email");
+        const storedRefreshToken = localStorage.getItem("refreshToken");
+        const storedUsername = localStorage.getItem("username");
+        const storedUserId = localStorage.getItem("userId");
+        console.log(
+          storedEmail,
+          storedRefreshToken,
+          storedUsername,
+          storedUserId
+        );
 
-      // Retrieve additional user information from local storage
-      const storedEmail = localStorage.getItem("email");
-      const storedRefreshToken = localStorage.getItem("refreshToken");
-      const storedUsername = localStorage.getItem("username");
-      const storeduserId = localStorage.getItem("userId");
-      if (storedEmail) {
-        setEmail(storedEmail);
+        // Retrieve additional user information from local storage
+
+        console.log(
+          storedEmail,
+          storedRefreshToken,
+          storedUsername,
+          storedUserId
+        );
+        // Check if each item is not undefined or null before setting the state
+        if (storedEmail !== undefined && storedEmail !== null) {
+          setEmail(storedEmail);
+        }
+        if (storedRefreshToken !== undefined && storedRefreshToken !== null) {
+          setRefreshToken(storedRefreshToken);
+        }
+        if (storedUsername !== undefined && storedUsername !== null) {
+          setUsername(storedUsername);
+        }
+        if (storedUserId !== undefined && storedUserId !== null) {
+          setUserId(storedUserId);
+        }
       }
-      if (storedRefreshToken) {
-        setRefreshToken(storedRefreshToken);
-      }
-      if (storedUsername) {
-        setUsername(storedUsername);
-      }
-      if (storeduserId) {
-        setUserId(storeduserId);
-      }
-    }
+    };
+    loadData();
   }, []);
 
   const login = (
@@ -45,19 +62,38 @@ export const AuthProvider = ({ children }) => {
     userUsername,
     userId
   ) => {
+    console.log(authToken, userEmail, userRefreshToken, userUsername, userId);
     setIsLoggedIn(true);
     setToken(authToken);
     setEmail(userEmail);
     setRefreshToken(userRefreshToken);
     setUsername(userUsername);
     setUserId(userId);
-    console.log("context api: ", userId);
+    console.log(authToken, userId, username);
+
     // Store the token and user information in localStorage when the user logs in
-    localStorage.setItem("accessToken", authToken);
-    localStorage.setItem("email", userEmail);
-    localStorage.setItem("refreshToken", userRefreshToken);
-    localStorage.setItem("username", userUsername);
-    localStorage.setItem("userId", userId);
+    if (typeof localStorage !== "undefined") {
+      // localStorage is available, you can use it here
+      console.log("local storage is available");
+    } else {
+      // localStorage is not available, handle this situation
+      console.log("local storage is not available");
+    }
+    try {
+      localStorage.setItem("accessToken", authToken);
+      localStorage.setItem("email", userEmail);
+      localStorage.setItem("refreshToken", userRefreshToken);
+      localStorage.setItem("username", userUsername);
+      localStorage.setItem("userId", userId);
+      console.log(localStorage.getItem("accessToken"));
+      console.log(localStorage.getItem("refreshToken"));
+      console.log(localStorage.getItem("username"));
+      console.log(localStorage.getItem("userId"));
+    } catch (err) {
+      console.log("error string local storage", err);
+    }
+
+    // Set the userId state after storing it in localStorage
   };
 
   const logout = () => {
